@@ -1,0 +1,46 @@
+{
+  "name": "kidshub-backend-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^3.0.2",
+    "bcrypt-nodejs": "0.0.3",
+    "body-parser": "^1.18.3",
+    "chalk": "^2.4.1",
+    "compression": "^1.7.3",
+    "connect-mongo": "^2.0.1",
+    "cookie-session": "^2.0.0-beta.3",
+    "cors": "^2.8.4",
+    "dotenv": "^6.1.0",
+    "express": "^4.16.4",
+    "express-statsd": "^0.3.0",
+    "express-status-monitor": "^1.2.3",
+    "express-validator": "^5.3.0",
+    "generate-password": "^1.4.1",
+    "helmet": "^3.14.0",
+    "jsonwebtoken": "^8.3.0",
+    "lusca": "^1.6.1",
+    "mongoose": "^5.3.9",
+    "mongoose-validator": "^2.1.0",
+    "morgan": "^1.9.1",
+    "passport": "^0.4.0",
+    "passport-jwt": "^4.0.0",
+    "passport-local": "^1.0.0",
+    "request": "^2.88.0",
+    "to-boolean": "^1.0.0"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.2.0",
+    "chai-json-equal": "0.0.1",
+    "mocha": "^5.2.0",
+    "sinon": "^7.1.1",
+    "supertest": "^3.3.0"
+  }
+}
