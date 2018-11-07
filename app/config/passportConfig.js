@@ -6,7 +6,8 @@ const ExtractJwt = require('passport-jwt').ExtractJwt;
 const pswgen = require('generate-password');
 
 const {
-    User
+    Parent,
+    Provider
 } = require('../db/index');
 
 module.exports = function (passport) {
@@ -14,49 +15,58 @@ module.exports = function (passport) {
         done(null, user.id);
     });
 
-
     passport.use('signup', new LocalStrategy({
         usernameField: 'username',
         passwordField: 'password',
         passReqToCallback: true
     }, async (req, username, password, done) => {
-        if (toBoolean(process.env.ACCEPTING_SIGNUPS)) {
-            const email = req.body.email;
-            const firstName = req.body.firstName;
-            const lastName = req.body.lastName;
-            const address = req.body.address;
-            const birthday = req.body.birthday;
-            var status = req.body.status;
+        const email = req.body.email;
+        const type = req.body.type;
+        const mobilePhoneNumber = req.body.mobilePhoneNumber;
 
+        if (type.localeCompare("parent") === 0) {
             try {
-                const user = await User.create({
+                const parent = await Parent.create({
                     'email': email,
                     'username': username,
                     'password': password,
-                    'profile.firstName': firstName,
-                    'profile.lastName': lastName,
-                    'profile.address': address,
-                    'profile.birthday': birthday,
-                    'status': status,
+                    'type': type,
+                    'mobilePhoneNumber': mobilePhoneNumber
                 });
-
-                done(user);
+                done(parent);
             } catch (error) {
                 done(error);
             }
-        } else {
-            done();
+
         }
+
+        if (type.localeCompare('provider') === 0) {
+            try {
+                const provider = await Provider.create({
+                    'email': email,
+                    'username': username,
+                    'password': password,
+                    'type': type,
+                    'mobilePhoneNumber': mobilePhoneNumber
+                });
+                done(provider);
+            } catch (error) {
+                done(error);
+            }
+        }
+
     }));
 
-    passport.use('login', new LocalStrategy({
+    passport.use('parentLogin', new LocalStrategy({
         usernameField: 'username',
         passwordField: 'password'
     }, async (username, password, done) => {
         try {
-            const user = await User.findOne({
+            const user = await Parent.findOne({
                 'username': username
             });
+
+
 
             // User wasn't found
             if (!user) {
@@ -82,17 +92,115 @@ module.exports = function (passport) {
         }
     }));
 
+    passport.use('providerLogin', new LocalStrategy({
+        usernameField: 'username',
+        passwordField: 'password'
+    }, async (username, password, done) => {
+        try {
+            const user = await Provider.findOne({
+                'username': username
+            });
+
+
+
+            // User wasn't found
+            if (!user) {
+                return done(null, false, {
+                    message: 'Wrong username or password.'
+                });
+            }
+
+            // Password compare passwords
+            const isMatch = await user.comparePassword(password);
+            if (!isMatch) {
+                return done(null, false, {
+                    message: 'Wrong username or password.'
+                });
+            }
+
+            // If everything went ok, send user information to the next middleware
+            return done(null, user, {
+                message: 'Logged in successfully'
+            });
+        } catch (error) {
+            done(error);
+        }
+    }));
+
+    // passport.use('login', new LocalStrategy({
+    //     usernameField: 'username',
+    //     passwordField: 'password'
+    // }, async (username, password, done) => {
+    //     try {
+    //         // check status of the user. If the user is provider, then fetch data from provider model, otherwise fetch data from parents model.
+    //         if (typeof req.body.type === 'undefined') {
+    //             // login type hasn't been specified.
+    //             console.log("req body type undefined");
+    //             const error = new Error('Login type wasn\'t specified');
+    //             return next(error);
+    //         }
+
+    //         const login_type = req.body.type;
+    //         console.log("LOGIN_TYPE: " + login_type);
+
+    //         var user = null;
+
+    //         if (login_type.localeCompare('parent') === 0) {
+    //             // find user in parent table
+    //             console.log("find parent");
+    //             user = await parent.findOne({
+    //                 'username': username
+    //             });
+    //         } else if (login_type.localeCompare('provider') === 0) {
+    //             user = await Provider.findOne({
+    //                 'username': username
+    //             });
+    //         }
+
+    //         // User wasn't found
+    //         if (!user) {
+    //             return done(null, false, {
+    //                 message: 'Wrong username or password.'
+    //             });
+    //         }
+
+    //         // Password compare passwords
+    //         const isMatch = await user.comparePassword(password);
+    //         if (!isMatch) {
+    //             return done(null, false, {
+    //                 message: 'Wrong username or password.'
+    //             });
+    //         }
+
+    //         // If everything went ok, send user information to the next middleware
+    //         return done(null, user, {
+    //             message: 'Logged in successfully'
+    //         });
+    //     } catch (error) {
+    //         done(error);
+    //     }
+    // }));
+
     var opts = {
         jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
         secretOrKey: process.env.JWT_SECRET
     };
     passport.use(new JwtStrategy(opts, async (jwt_payload, done) => {
         try {
-            let err, user = await User.findOne({
+            let err, user = await Parent.findOne({
                 id: jwt_payload.sub
             });
 
-            if (err) return done(err, false);
+            if (err) {
+                let err, user = await Provider.findOne({
+                    id: jwt_payload.sub
+                });
+                if (user) {
+                    return done(null, user);
+                } else {
+                    return done(null, false);
+                }
+            }
             if (user) {
                 return done(null, user);
             } else {
