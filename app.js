@@ -47,7 +47,6 @@ const authRoutes = require('./app/routes/authRoutes');
 app.use('/api/auth/', authRoutes);
 
 app.use('/api/auth/test', passport.authenticate('jwt'), (req, res, next) => {
-    console.log(' authenticated!~');
     res.send(200);
 });
 
