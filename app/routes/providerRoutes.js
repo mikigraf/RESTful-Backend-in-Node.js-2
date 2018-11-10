@@ -4,6 +4,10 @@ const router = express.Router();
 const {
     Provider
 } = require("../db/index");
+const {
+    upload_pictures,
+    s3
+} = require('../config/s3');
 
 const isAdmin = require("../middlewares/isAdmin");
 const isAdminOrTargetUser = require("../middlewares/isAdminOrTargetUser");
@@ -83,6 +87,36 @@ router.delete('/providers/:userId', isAdminOrTargetProvider, async (req, res, ne
         }
 
         res.status(200).send('User has been deleted succesfully');
+    } catch (error) {
+        res.status(500).send('Internal server error');
+    }
+});
+
+router.post('/providers/:userId/avatar', [isAdminOrTargetUser, upload_pictures.single('avatar')], async (req, res, next) => {
+    try {
+        let title = req.file.originalname;
+        let userId = req.user.id;
+
+        let user = await Provider.findById(req.user.id);
+        user.avatar = req.file.location;
+        user.save();
+
+        res.status(200).send('Profile picture has been saved succesfully.');
+    } catch (error) {
+        res.status(500).send('Internal server error');
+    }
+});
+
+router.get('/providers/:userId/avatar', async (req, res, next) => {
+    try {
+        let current_user = await Provider.findById(req.params.userId);
+        const url = s3.getSignedUrl('getObject', {
+            Bucket: 'pictures',
+            Key: current_user.avatar,
+            Expires: 60 * 60 // 1h expiration time for the url
+        });
+
+        res.status(200).json(url);
     } catch (error) {
         res.status(500).send('Internal server error');
     }

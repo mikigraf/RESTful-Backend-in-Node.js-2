@@ -6,7 +6,7 @@ const {
     Kid
 } = require("../db/index");
 const {
-    upload,
+    upload_pictures,
     s3
 } = require('../config/s3');
 const isAdmin = require("../middlewares/isAdmin");
@@ -56,7 +56,7 @@ router.get('/parents/:userId', async (req, res, next) => {
     }
 });
 
-router.post('/parents/:userId/avatar', [isAdminOrTargetUser, upload.single('avatar')], async (req, res, next) => {
+router.post('/parents/:userId/avatar', [isAdminOrTargetUser, upload_pictures.single('avatar')], async (req, res, next) => {
     try {
         let title = req.file.originalname;
         let userId = req.user.id;
@@ -73,7 +73,7 @@ router.post('/parents/:userId/avatar', [isAdminOrTargetUser, upload.single('avat
 
 router.get('/parents/:userId/avatar', async (req, res, next) => {
     try {
-        let current_user = await User.findById(req.params.userId);
+        let current_user = await Parent.findById(req.params.userId);
         const url = s3.getSignedUrl('getObject', {
             Bucket: 'pictures',
             Key: current_user.avatar,

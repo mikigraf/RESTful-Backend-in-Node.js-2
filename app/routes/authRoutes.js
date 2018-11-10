@@ -3,6 +3,10 @@ const passport = require('passport');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
 const pswgen = require('generate-password');
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const twilioClient = require('twilio')(accountSid, authToken);
+
 /**
  * @api {post} /signup Register 
  * @apiName Signup new user with local strategy
@@ -102,9 +106,9 @@ router.post('/login', async (req, res, next) => {
  * @apiSuccess {String} username of registered user. 
  * 
  */
-router.post('/forgot', async (req, res, next) => {
+router.post('/providers/forgot', async (req, res, next) => {
     try {
-        let user = await User.findOne({
+        let user = await Provider.findOne({
             'username': req.body.username
         });
 
@@ -117,14 +121,45 @@ router.post('/forgot', async (req, res, next) => {
             user.password = password;
 
             user.save();
+            let phone_number = user.mobilePhoneNumber;
+            twilioClient.messages
+                .create({
+                    body: 'This is your new password for Kidshub: ' + password,
+                    from: process.env.TWILIO_PHONE_NUMBER,
+                    to: phoneNumber
+                })
+                .then(message => console.log(message.sid))
+                .done();
+            res.send(200);
+        }
+    } catch (error) {
+        return next(error);
+    }
+});
 
-            const mailOptions = {
-                from: process.env.CLIENT_EMAIL_ADDRESS,
-                to: user.email,
-                subject: 'Password reminder from WSIT',
-                text: 'Password: ' + password + ' login: ' + user.username
-            };
-            emailTransporter.sendMail(mailOptions);
+router.post('/parents/forgot', async (req, res, next) => {
+    try {
+        let user = await Parent.findOne({
+            'username': req.body.username
+        });
+
+        if (user) {
+            const password = pswgen.generate({
+                length: 10,
+                numbers: true
+            });
+
+            user.password = password;
+
+            user.save();
+            twilioClient.messages
+                .create({
+                    body: 'This is your new password for Kidshub: ' + password,
+                    from: process.env.TWILIO_PHONE_NUMBER,
+                    to: phoneNumber
+                })
+                .then(message => console.log(message.sid))
+                .done();
             res.send(200);
         }
     } catch (error) {
