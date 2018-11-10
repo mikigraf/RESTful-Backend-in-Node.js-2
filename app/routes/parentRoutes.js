@@ -122,7 +122,7 @@ router.delete('/parents/:userId', isAdminOrTargetParent, async (req, res, next) 
     }
 });
 
-// add kid
+// add 1 kid
 router.post('/parents/:userId/kids', isAdminOrTargetUser, async (req, res, next) => {
     try {
         // array containing kids objects
@@ -146,6 +146,7 @@ router.post('/parents/:userId/kids', isAdminOrTargetUser, async (req, res, next)
     }
 });
 
+// delete 1 kid
 router.delete('/parents/:userId/kids', isAdminOrTargetUser, async (req, res, next) => {
     try {
         // kid id
@@ -171,6 +172,8 @@ router.delete('/parents/:userId/kids', isAdminOrTargetUser, async (req, res, nex
         res.status(500).send('Internal server error');
     }
 });
+
+
 
 
 module.exports = router;

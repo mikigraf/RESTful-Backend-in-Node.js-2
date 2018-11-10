@@ -12,7 +12,7 @@ const {
 const isAdmin = require("../middlewares/isAdmin");
 const isAdminOrTargetUser = require("../middlewares/isAdminOrTargetUser");
 
-router.get('/providers', isAdmin, async (req, res, next) => {
+router.get('/providers', async (req, res, next) => {
     try {
         var page = parseInt(req.query.page) || 0;
         var limit = parseInt(req.query.limit) || 100;
@@ -29,7 +29,7 @@ router.get('/providers', isAdmin, async (req, res, next) => {
 
             res.status(200).json({
                 'count': count,
-                'providers': ids
+                'items': ids
             });
         } else {
             // query parameters are specified
