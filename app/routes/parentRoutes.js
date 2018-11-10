@@ -2,9 +2,13 @@ const passport = require("passport");
 const express = require("express");
 const router = express.Router();
 const {
-    Parent
+    Parent,
+    Kid
 } = require("../db/index");
-
+const {
+    upload,
+    s3
+} = require('../config/s3');
 const isAdmin = require("../middlewares/isAdmin");
 const isAdminOrTargetUser = require("../middlewares/isAdminOrTargetUser");
 
@@ -52,6 +56,36 @@ router.get('/parents/:userId', async (req, res, next) => {
     }
 });
 
+router.post('/parents/:userId/avatar', [isAdminOrTargetUser, upload.single('avatar')], async (req, res, next) => {
+    try {
+        let title = req.file.originalname;
+        let userId = req.user.id;
+
+        let user = await Parent.findById(req.user.id);
+        user.avatar = req.file.location;
+        user.save();
+
+        res.status(200).send('Profile picture has been saved succesfully.');
+    } catch (error) {
+        res.status(500).send('Internal server error');
+    }
+});
+
+router.get('/parents/:userId/avatar', async (req, res, next) => {
+    try {
+        let current_user = await User.findById(req.params.userId);
+        const url = s3.getSignedUrl('getObject', {
+            Bucket: 'pictures',
+            Key: current_user.avatar,
+            Expires: 60 * 60 // 1h expiration time for the url
+        });
+
+        res.status(200).json(url);
+    } catch (error) {
+        res.status(500).send('Internal server error');
+    }
+});
+
 router.post('/parents/:userId', isAdminOrTargetParent, async (req, res, next) => {
     try {
         let user = await Parent.findOneAndUpdate({
@@ -87,5 +121,56 @@ router.delete('/parents/:userId', isAdminOrTargetParent, async (req, res, next) 
         res.status(500).send('Internal server error');
     }
 });
+
+// add kid
+router.post('/parents/:userId/kids', isAdminOrTargetUser, async (req, res, next) => {
+    try {
+        // array containing kids objects
+        let new_kid = req.body.kid;
+        let created_kid, err = await Kid.create(new_kid);
+        if (err) {
+            res.status(500).send('Internal server error');
+        }
+
+        let parent = await Parent.findByIdAndUpdate({
+            _id: req.user._id
+        }, {
+            "$push": {
+                "kids": created_kid._id
+            }
+        });
+
+        res.status(200).json(parent);
+    } catch (error) {
+        res.status(500).send('Internal server error');
+    }
+});
+
+router.delete('/parents/:userId/kids', isAdminOrTargetUser, async (req, res, next) => {
+    try {
+        // kid id
+        let kid_to_remove = req.body.kid;
+        let parent, err = await Parent.update({
+            _id: kid_to_remove
+        }, {
+            $pullAll: {
+                _id: req.body.kid
+            }
+        });
+
+        if (err) {
+            res.status(500).send('Internal server error');
+        }
+
+        await Kid.remove({
+            _id: kid_to_remove
+        })
+
+        res.status(200).send(parent);
+    } catch (error) {
+        res.status(500).send('Internal server error');
+    }
+});
+
 
 module.exports = router;
