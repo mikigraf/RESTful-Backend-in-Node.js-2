@@ -68,6 +68,43 @@ describe("Parents", () => {
                     })
             })
         })
+    });
+
+    describe("/POST kid", () => {
+        it("should create new child for this parent", done => {
+            Parent.findOne({
+                username: parent1.username
+            }).then(user => {
+                chai.request(server)
+                    .post(`/api/parents/${user.id}/kids`)
+                    .set('authorization', parent_token)
+                    .set('content-type', 'application/json')
+                    .send({
+                        kid: {
+                            parent: user._id,
+                            age: 12,
+                            gender: 'male'
+                        }
+                    }).end((err, res) => {
+                        res.should.have.status(200);
+                        done();
+                    });
+            })
+        });
+    });
+
+    describe("/GET kids", () => {
+        it("should return list of references to kids for this parent", done => {
+            Parent.findOne({
+                username: parent1.username
+            }).then(user => {
+                chai.request(server).get(`/api/parents/${user.id}/kids`)
+                    .set('authorization', parent_token)
+                    .end((err, res) => {
+                        res.should.have.status(200);
+                    })
+            });
+        })
     })
 
 

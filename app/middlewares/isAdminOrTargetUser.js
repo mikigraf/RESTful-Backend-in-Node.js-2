@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 
 async function isAdminOrTargetUser(req, res, next) {
     try {
-        let user = await User.findById(req.user._id);
+        let user = await User.findById(req.user.id);
         if (user.type.localeCompare('admin') === '0') {
             next();
         }

@@ -149,22 +149,15 @@ router.delete('/parents/:userId', isAdminOrTargetParent, async (req, res, next) 
 });
 
 // add 1 kid
-router.post('/parents/:userId/kids', isAdminOrTargetUser, async (req, res, next) => {
+router.post('/parents/:userId/kids', async (req, res, next) => {
     try {
-        // array containing kids objects
         let new_kid = req.body.kid;
-        let created_kid, err = await Kid.create(new_kid);
-        if (err) {
-            res.status(500).send('Internal server error');
-        }
+        let created_kid = await Kid.create(new_kid);
 
-        let parent = await Parent.findByIdAndUpdate({
-            _id: req.user._id
-        }, {
-            "$push": {
-                "kids": created_kid._id
-            }
-        });
+        let parent = await Parent.findById(req.params.userId);
+        parent.kids.push(created_kid);
+        parent.save();
+
 
         res.status(200).json(parent);
     } catch (error) {
@@ -172,6 +165,14 @@ router.post('/parents/:userId/kids', isAdminOrTargetUser, async (req, res, next)
     }
 });
 
+router.get('/parents/:userId/kids', async (req, res, next) => {
+    try {
+        let parent = await Parent.findById(req.params.userId);
+        res.status(200).json(parent.kids);
+    } catch (error) {
+        res.status(500).send('Internal server error');
+    }
+})
 // delete 1 kid
 router.delete('/parents/:userId/kids', isAdminOrTargetUser, async (req, res, next) => {
     try {
