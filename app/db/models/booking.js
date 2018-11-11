@@ -40,15 +40,5 @@ const bookingSchema = new mongoose.Schema({
     }
 });
 
-// Getter for price
-bookingSchema.path('price').get(function (num) {
-    return (num / 100).toFixed(2);
-});
-
-// Setter for price
-bookingSchema.path('price').set(function (num) {
-    return num * 100;
-});
-
 const Booking = mongoose.model("Booking", bookingSchema);
 module.exports = Booking;

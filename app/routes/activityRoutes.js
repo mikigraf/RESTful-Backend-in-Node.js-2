@@ -1,6 +1,18 @@
 const passport = require("passport");
-const express = require("express");
+var express = require('express');
 const router = express.Router();
+
+var aws = require('aws-sdk')
+var express = require('express')
+var multer = require('multer')
+var multerS3 = require('multer-s3')
+var uuidv4 = require('uuid/v4');
+
+var s3 = new aws.S3({
+    endpoint: process.env.S3_ENDPOINT,
+    signatureVersion: 'v4',
+    region: process.env.S3_REGION
+});
 
 const {
     Provider,
@@ -9,11 +21,7 @@ const {
     Activity
 } = require("../db/index");
 
-const {
-    upload_pictures,
-    s3
-} = require('../config/s3');
-
+const isAdmin = require('../middlewares/isAdmin');
 router.get("/activities", async (req, res, next) => {
     try {
         var page = parseInt(req.query.page) || 0;
@@ -79,14 +87,6 @@ router.post("/activities", isAdmin, async (req, res, next) => {
                 'items': ids
             });
         }
-    } catch (error) {
-        res.status(500).send('Internal server error');
-    }
-});
-
-router.delete("/activities", isAdmin, async (req, res, next) => {
-    try {
-
     } catch (error) {
         res.status(500).send('Internal server error');
     }
@@ -163,26 +163,48 @@ router.get("/activities/:activityId/pictures", async (req, res, next) => {
             res.status(500).send('Internal server error');
         }
 
-        let picturesPaths = activity.pictures;
-        let picturesUrls = [];
+        // let picturesPaths = activity.pictures;
+        // let picturesUrls = [];
         // get signed url for all of them
-        picturesPaths.forEach((path) => {
-            let url = s3.getSignedUrl('getObject', {
-                Bucket: 'pictures',
-                Key: path,
-                Expires: 60 * 60 // h expiration time for the signed url
-            });
-            picturesUrls.push(url);
-        });
+        // picturesPaths.forEach((path) => {
+        //     let url = s3.getSignedUrl('getObject', {
+        //         Bucket: 'pictures',
+        //         Key: path,
+        //         Expires: 60 * 60 // h expiration time for the signed url
+        //     });
+        //     picturesUrls.push(url);
+        // });
 
-        res.status(200).json(picturesUrls);
+        res.status(200).json(activity.pictures);
     } catch (error) {
         res.status(500).send('Internal server error');
     }
 });
-router.post("/activities/:activityId/pictures", async (req, res, next) => {
-    try {
 
+// add 1 picture 
+var upload_pictures = multer({
+    storage: multerS3({
+        s3: s3,
+        bucket: process.env.S3_BUCKET,
+        acl: 'public-read',
+        metadata: function (req, file, cb) {
+            cb(null, {
+                fieldName: file.fieldname
+            });
+        },
+        key: function (req, file, cb) {
+            cb(null, `pictures/${uuidv4()}${path.extname(file.originalname)}`);
+        }
+    })
+});
+router.post("/activities/:activityId/pictures", upload_pictures.single('picture'), async (req, res, next) => {
+    try {
+        let title = req.file.originalname;
+        let userId = req.user._id;
+        let activity = await Activity.findById(req.params.activityId);
+        activity.pictures.push(req.file.location);
+        activity.save();
+        res.status(200).json(activity);
     } catch (error) {
         res.status(500).send('Internal server error');
     }
@@ -190,7 +212,12 @@ router.post("/activities/:activityId/pictures", async (req, res, next) => {
 
 router.get("/activities/:activityId/ratings", async (req, res, next) => {
     try {
+        let activity = await Activity.findById(req.params.activityId).populate('ratings.voter');
+        if (!activity) {
+            res.status(500).send('Internal server error');
+        }
 
+        res.status(200).json(activity.ratings);
     } catch (error) {
         res.status(500).send('Internal server error');
     }
@@ -198,7 +225,12 @@ router.get("/activities/:activityId/ratings", async (req, res, next) => {
 // create new rating
 router.post("/activities/:activityId/ratings", async (req, res, next) => {
     try {
-
+        let activity = await Activity.findById(req.params.activityId);
+        activity.ratings.push(
+            req.body.rating
+        );
+        activity.save();
+        res.status(200).json(activity);
     } catch (error) {
         res.status(500).send('Internal server error');
     }
@@ -206,7 +238,8 @@ router.post("/activities/:activityId/ratings", async (req, res, next) => {
 
 router.get("/activities/:activityId/provider", async (req, res, next) => {
     try {
-
+        let activity = await Activity.findById(req.params.activityId).populate('provider');
+        res.status(200).json(activity.provider);
     } catch (error) {
         res.status(500).send('Internal server error');
     }
@@ -214,7 +247,10 @@ router.get("/activities/:activityId/provider", async (req, res, next) => {
 
 router.get("/activities/:activityId/bookings", async (req, res, next) => {
     try {
-
+        let bookings = await Activity.findAll({
+            'activity': req.params.activityId
+        })
+        res.status(200).json(bookings);
     } catch (error) {
         res.status(500).send('Internal server error');
     }
@@ -222,8 +258,13 @@ router.get("/activities/:activityId/bookings", async (req, res, next) => {
 
 router.post("/activities/:activityId/wishlist", async (req, res, next) => {
     try {
-
+        let parent = await Parent.findById(req.user._id);
+        parent.wishlist.push(req.params.activityId);
+        parent.save();
+        res.status(200).json(parent);
     } catch (error) {
         res.status(500).send('Internal server error');
     }
 });
+
+module.exports = router;

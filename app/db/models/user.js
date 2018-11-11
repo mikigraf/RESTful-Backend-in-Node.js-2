@@ -86,5 +86,5 @@ providerSchema.methods.comparePassword = async function (candidatePassword, cb) 
     }
 };
 
-const Provider = mongoose.model("Provider", providerSchema);
-module.exports = Provider;
+const User = mongoose.model("User", providerSchema);
+module.exports = User;

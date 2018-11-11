@@ -81,7 +81,7 @@ router.post('/bookings/:bookingId', async (req, res, next) => {
             res.status(500).send('Internal server error');
         }
 
-        if (req.user.type.localeCompare('admin') || req.user.id === booking.buyer) {
+        if (req.user.type.localeCompare('admin') || req.user._id === booking.buyer) {
             let booking = await Booking.findByIdAndUpdate(req.params.bookingId, req.body.booking);
             res.status(200).json(booking);
         };
@@ -156,7 +156,7 @@ router.post('/bookings/:bookingId/pay', async (req, res, next) => {
             'https://www.myfatoorah.com/pg/PayGatewayService.asmx', {
                 method: 'POST',
                 headers: headers,
-                data = payment_request,
+                data: payment_request,
             }
         )
 
@@ -188,7 +188,7 @@ router.post('/bookings/:bookingId/pay/success', async (req, res, next) => {
 router.delete('/bookings/:bookingId', async (req, res, next) => {
     try {
         let booking = await Booking.findById(req.params.bookingId);
-        if (booking && req.user.id === booking.buyer) {
+        if (booking && req.user._id === booking.buyer) {
             await Booking.findByIdAndRemove(req.params.bookingId)
         } else {
             res.status(401).send('Unauthorized');
@@ -223,3 +223,5 @@ router.get('/bookings/:bookingId/activity', async (req, res, next) => {
         res.status(500).send('Internal server error');
     }
 });
+
+module.exports = router;

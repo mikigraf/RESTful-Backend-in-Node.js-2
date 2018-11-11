@@ -1,4 +1,6 @@
-const User = require('../db/models/user');
+const {
+    User
+} = require('../db/index');
 const jwt = require('jsonwebtoken');
 
 async function isAdmin(req, res, next) {

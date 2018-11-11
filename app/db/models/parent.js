@@ -62,9 +62,9 @@ const parentSchema = new mongoose.Schema({
         ref: 'Booking'
     }],
 
-    liked: [{
+    wishlist: [{
         type: Schema.Types.ObjectId,
-        ref: ''
+        ref: 'Activity'
     }],
 
 });

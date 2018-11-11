@@ -1,9 +1,9 @@
-const Provider = require('../db/models/provider');
+const Parent = require('../db/models/parent');
 const jwt = require('jsonwebtoken');
 
-async function isAdminOrTargetUser(req, res, next) {
+async function isAdminOrTargetParent(req, res, next) {
     try {
-        let user = await Provider.findById(req.user._id);
+        let user = await Parent.findById(req.user._id);
         if (user.type.localeCompare('admin') === '0') {
             next();
         }
@@ -19,4 +19,4 @@ async function isAdminOrTargetUser(req, res, next) {
     next();
 }
 
-module.exports = isAdminOrTargetUser;
+module.exports = isAdminOrTargetParent;

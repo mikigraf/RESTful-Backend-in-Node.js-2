@@ -4,13 +4,9 @@ const router = express.Router();
 const {
     Provider
 } = require("../db/index");
-const {
-    upload_pictures,
-    s3
-} = require('../config/s3');
-
 const isAdmin = require("../middlewares/isAdmin");
 const isAdminOrTargetUser = require("../middlewares/isAdminOrTargetUser");
+const isAdminOrTargetProvider = require('../middlewares/isAdminOrTargetProvider')
 
 router.get('/providers', async (req, res, next) => {
     try {
@@ -93,13 +89,38 @@ router.delete('/providers/:userId', isAdminOrTargetProvider, async (req, res, ne
         res.status(500).send('Internal server error');
     }
 });
+var aws = require('aws-sdk')
+var multer = require('multer')
+var multerS3 = require('multer-s3')
+var uuidv4 = require('uuid/v4');
 
+var s3 = new aws.S3({
+    endpoint: process.env.S3_ENDPOINT,
+    signatureVersion: 'v4',
+    region: process.env.S3_REGION
+});
+
+var upload_pictures = multer({
+    storage: multerS3({
+        s3: s3,
+        bucket: process.env.S3_BUCKET,
+        acl: 'public-read',
+        metadata: function (req, file, cb) {
+            cb(null, {
+                fieldName: file.fieldname
+            });
+        },
+        key: function (req, file, cb) {
+            cb(null, `pictures/${uuidv4()}${path.extname(file.originalname)}`);
+        }
+    })
+});
 router.post('/providers/:userId/avatar', [isAdminOrTargetUser, upload_pictures.single('avatar')], async (req, res, next) => {
     try {
         let title = req.file.originalname;
-        let userId = req.user.id;
+        let userId = req.user._id;
 
-        let user = await Provider.findById(req.user.id);
+        let user = await Provider.findById(req.user._id);
         user.avatar = req.file.location;
         user.save();
 
