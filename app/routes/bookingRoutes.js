@@ -50,17 +50,12 @@ router.get('/bookings', async (req, res, next) => {
 
 router.post('/bookings', async (req, res, next) => {
     try {
-        // create booking with associated payment with uuid4 with status notPaid.
         let booking = await Booking.create(req.body.booking);
-        let
-    } catch (error) {
-        res.status(500).send('Internal server error');
-    }
-});
+        if (!booking) {
+            res.status(500).send('Internal server error');
+        }
 
-router.delete('/bookings', async (req, res, next) => {
-    try {
-
+        res.status(200).json(booking);
     } catch (error) {
         res.status(500).send('Internal server error');
     }
@@ -68,7 +63,12 @@ router.delete('/bookings', async (req, res, next) => {
 
 router.get('/bookings/:bookingId', async (req, res, next) => {
     try {
+        let booking = await Booking.findById(req.params.bookingId);
+        if (!booking) {
+            res.status(500).send('Internal server error');
+        }
 
+        res.status(200).json(booking);
     } catch (error) {
         res.status(500).send('Internal server error');
     }
@@ -76,7 +76,17 @@ router.get('/bookings/:bookingId', async (req, res, next) => {
 
 router.post('/bookings/:bookingId', async (req, res, next) => {
     try {
+        let booking = await Booking.findById(req.params.bookingId);
+        if (!booking) {
+            res.status(500).send('Internal server error');
+        }
 
+        if (req.user.type.localeCompare('admin') || req.user.id === booking.buyer) {
+            let booking = await Booking.findByIdAndUpdate(req.params.bookingId, req.body.booking);
+            res.status(200).json(booking);
+        };
+
+        res.status(401).send('Unauthorized');
     } catch (error) {
         res.status(500).send('Internal server error');
     }
@@ -177,7 +187,12 @@ router.post('/bookings/:bookingId/pay/success', async (req, res, next) => {
 
 router.delete('/bookings/:bookingId', async (req, res, next) => {
     try {
-
+        let booking = await Booking.findById(req.params.bookingId);
+        if (booking && req.user.id === booking.buyer) {
+            await Booking.findByIdAndRemove(req.params.bookingId)
+        } else {
+            res.status(401).send('Unauthorized');
+        }
     } catch (error) {
         res.status(500).send('Internal server error');
     }
@@ -185,7 +200,12 @@ router.delete('/bookings/:bookingId', async (req, res, next) => {
 
 router.get('/bookings/:bookingId/kid', async (req, res, next) => {
     try {
+        let booking = await Booking.findById(req.params.bookingId).populate('kids');
+        if (!booking) {
+            res.status(500).send('Internal server error');
+        }
 
+        res.status(200).json(booking.kids);
     } catch (error) {
         res.status(500).send('Internal server error');
     }
@@ -193,7 +213,12 @@ router.get('/bookings/:bookingId/kid', async (req, res, next) => {
 
 router.get('/bookings/:bookingId/activity', async (req, res, next) => {
     try {
+        let booking = await Booking.findById(req.params.bookingId).populate('activity');
+        if (!booking) {
+            res.status(500).send('Internal server error');
+        }
 
+        res.status(200).json(booking.activity);
     } catch (error) {
         res.status(500).send('Internal server error');
     }
