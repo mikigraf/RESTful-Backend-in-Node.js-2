@@ -4,6 +4,15 @@ services:
   mongo:
     image: mongo:3.6
     restart: on-failure
+    ports:
+      - "27018:27018"
+
+    # MongoDB for persistency
+  mongo_dev:
+    image: mongo:3.6
+    restart: on-failure
+    ports:
+      - "27017:27017"
 
   # Restful backend API
   backend:
@@ -15,8 +24,10 @@ services:
       - MONGODB_URI=mongodb://mongo:27017/kidshub
     links:
       - mongo
+      - mongo_dev
     depends_on:
       - mongo
+      - mongo_dev
     volumes:
       - .:/starter
       - /starter/node_modules
