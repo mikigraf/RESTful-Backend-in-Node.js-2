@@ -39,7 +39,9 @@ router.get('/providers', async (req, res, next) => {
             }
 
             const ids = users.map(u => u._id);
-            res.status(200).json(ids);
+            res.status(200).json({
+                'items': ids
+            });
         }
     } catch (error) {
         res.status(500).send('Internal server error');
@@ -115,7 +117,6 @@ router.get('/providers/:userId/avatar', async (req, res, next) => {
             Key: current_user.avatar,
             Expires: 60 * 60 // 1h expiration time for the url
         });
-
         res.status(200).json(url);
     } catch (error) {
         res.status(500).send('Internal server error');

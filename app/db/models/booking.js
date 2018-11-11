@@ -33,6 +33,10 @@ const bookingSchema = new mongoose.Schema({
     },
     transaction: {
         type: String
+    },
+    isPaid: {
+        type: Boolean,
+        default: false
     }
 });
 

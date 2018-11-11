@@ -39,7 +39,9 @@ router.get('/parents', isAdmin, async (req, res, next) => {
             }
 
             const ids = users.map(u => u._id);
-            res.status(200).json(ids);
+            res.status(200).json({
+                'items': ids
+            });
         }
     } catch (error) {
         res.status(500).send('Internal server error');

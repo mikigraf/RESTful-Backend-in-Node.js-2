@@ -36,7 +36,9 @@ router.get('/bookings', async (req, res, next) => {
             }
 
             const ids = items.map(u => u._id);
-            res.status(200).json(ids);
+            res.status(200).json({
+                'items': ids
+            });
         }
     } catch (error) {
         res.status(500).send('Internal server error');
@@ -45,7 +47,9 @@ router.get('/bookings', async (req, res, next) => {
 
 router.post('/bookings', async (req, res, next) => {
     try {
-
+        // create booking with associated payment with uuid4 with status notPaid.
+        let booking = await Booking.create(req.body.booking);
+        let
     } catch (error) {
         res.status(500).send('Internal server error');
     }
@@ -70,6 +74,64 @@ router.get('/bookings/:bookingId', async (req, res, next) => {
 router.post('/bookings/:bookingId', async (req, res, next) => {
     try {
 
+    } catch (error) {
+        res.status(500).send('Internal server error');
+    }
+});
+
+router.post('/bookings/:bookingId/pay', async (req, res, next) => {
+    try {
+        var booking = await Booking.findById(req.params.bookingId).populate('activity');
+
+        if (!booking) {
+            res.status(500).send('Internal server error');
+        }
+
+        let url = "https://test.myfatoorah.com/pg/PayGatewayService.asmx";
+        let user = "testapi@myfatoorah.com";
+        let password = "E55D0";
+
+        let merchant_code = process.env.MYFATOORAH_MERCHANT_CODE;
+        let merchant_refrence = process.env.MYFATOORAH_MERCHANT_REFERENCE;
+        let merchant_email = process.env.MYFATOORAH_MERCHANT_NAME;
+        let merchant_password = process.env.MYFATOORAH_MERCHANT_PASSWORD;
+        let merchant_error_url = process.env.MYFATOORAH_MERCHANT_ERROR_URL;
+        let merchant_return_url = process.env.MYFATOORAH_MERCHANT_RETURN_URL;
+        let price = booking.activity.price;
+        let qty = 1;
+
+        let return_url = 'http://events.joincoded.com';
+        let error_url = 'http://events.joincoded.com';
+
+        let request = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
+            `<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"> ` +
+            `<soap:Body>` +
+            `<PaymentRequest xmlns=\"http://tempuri.org/\">` +
+            `<req>` +
+            `<CustomerDC>` +
+            `<Name>'${req.user.username}'</Name>` +
+            ` <Email>'${req.user.email}'</Email>` +
+            ` <Mobile'${req.user.mobilePhoneNumber}'</Mobile>` +
+            ` </CustomerDC>` +
+            ` <MerchantDC>` +
+            ` <merchant_code>${merchant_code}</merchant_code>` +
+            ` <merchant_username>${merchant_name}</merchant_username>` +
+            ` <merchant_password>${merchant_password}</merchant_password>` +
+            ` <merchant_ReferenceID>${merchant_reference}</merchant_ReferenceID>` +
+            ` <ReturnURL>${merchant_return_url}</ReturnURL>` +
+            ` <merchant_error_url>${merchant_error_url}</merchant_error_url>` +
+            ` </MerchantDC>` +
+            ` <lstProductDC>` +
+            ` <ProductDC>` +
+            ` <product_name>${booking.activity.title}</product_name>` +
+            ` <unitPrice>${booking.activity.price}</unitPrice>` +
+            ` <qty>1</qty>` +
+            ` </ProductDC>` +
+            ` </lstProductDC>` +
+            ` </req>` +
+            ` </PaymentRequest>` +
+            ` </soap:Body>` +
+            ` </soap:Envelope>`
     } catch (error) {
         res.status(500).send('Internal server error');
     }
