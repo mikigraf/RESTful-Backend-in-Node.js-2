@@ -9,6 +9,9 @@ const {
     Booking
 } = require('../db/index');
 
+const request = require('async-request');
+const xml2js = require('xml2js');
+
 router.get('/bookings', async (req, res, next) => {
     try {
         var page = parseInt(req.query.page) || 0;
@@ -92,18 +95,17 @@ router.post('/bookings/:bookingId/pay', async (req, res, next) => {
         let password = "E55D0";
 
         let merchant_code = process.env.MYFATOORAH_MERCHANT_CODE;
-        let merchant_refrence = process.env.MYFATOORAH_MERCHANT_REFERENCE;
-        let merchant_email = process.env.MYFATOORAH_MERCHANT_NAME;
+        // let merchant_reference = process.env.MYFATOORAH_MERCHANT_REFERENCE;
+        let merchant_reference = booking._id;
+        let merchant_name = process.env.MYFATOORAH_MERCHANT_NAME;
         let merchant_password = process.env.MYFATOORAH_MERCHANT_PASSWORD;
         let merchant_error_url = process.env.MYFATOORAH_MERCHANT_ERROR_URL;
-        let merchant_return_url = process.env.MYFATOORAH_MERCHANT_RETURN_URL;
-        let price = booking.activity.price;
-        let qty = 1;
+        let merchant_return_url = '/bookings/' + booking._id + '/pay/success';
 
         let return_url = 'http://events.joincoded.com';
         let error_url = 'http://events.joincoded.com';
 
-        let request = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
+        let payment_request = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
             `<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\"> ` +
             `<soap:Body>` +
             `<PaymentRequest xmlns=\"http://tempuri.org/\">` +
@@ -132,6 +134,42 @@ router.post('/bookings/:bookingId/pay', async (req, res, next) => {
             ` </PaymentRequest>` +
             ` </soap:Body>` +
             ` </soap:Envelope>`
+
+        headers = {
+            'Host': 'www.myfatoorah.com',
+            'Content-Type': 'text/xml',
+            'Content-Length': request.length,
+            'SOAPAction': 'http://tempuri.org/PaymentRequest'
+        }
+
+        let response = await request(
+            'https://www.myfatoorah.com/pg/PayGatewayService.asmx', {
+                method: 'POST',
+                headers: headers,
+                data = payment_request,
+            }
+        )
+
+        let regex1 = '<paymentURL *[^>]*>.*</paymentURL *>';
+        var paymentUrlRaw = response.body.search(regex1);
+        let paymentUrl = paymentUrlRaw.replace('<paymentURL>').replace('/paymentURL');
+        res.status(200).send(paymentUrl);
+    } catch (error) {
+        res.status(500).send('Internal server error');
+    }
+});
+
+router.post('/bookings/:bookingId/pay/success', async (req, res, next) => {
+    try {
+        var booking = await Booking.findById(req.params.bookingId).populate('activity');
+        if (!booking) {
+            res.status(500).send('Internal server error');
+        }
+        booking.isPaid = true;
+        booking.save();
+
+        res.status(200).json(booking);
+
     } catch (error) {
         res.status(500).send('Internal server error');
     }
