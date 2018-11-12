@@ -2,6 +2,9 @@ const passport = require("passport");
 const express = require("express");
 const router = express.Router();
 
+const isParent = require('../middlewares/isParent');
+const isProvider = require('../middlewares/isProvider');
+
 const {
     Provider,
     Parent,
@@ -162,7 +165,7 @@ router.post('/bookings/:bookingId/pay', async (req, res, next) => {
 
         let regex1 = '<paymentURL *[^>]*>.*</paymentURL *>';
         var paymentUrlRaw = response.body.search(regex1);
-        let paymentUrl = paymentUrlRaw.replace('<paymentURL>').replace('/paymentURL');
+        let paymentUrl = paymentUrlRaw.replace('<paymentURL>').replace('</paymentURL>');
         res.status(200).send(paymentUrl);
     } catch (error) {
         res.status(500).send('Internal server error');

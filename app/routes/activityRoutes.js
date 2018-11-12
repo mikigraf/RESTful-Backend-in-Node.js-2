@@ -8,6 +8,10 @@ var multer = require('multer')
 var multerS3 = require('multer-s3')
 var uuidv4 = require('uuid/v4');
 
+const isParent = require('../middlewares/isParent');
+const isProvider = require('../middlewares/isProvider');
+
+
 var s3 = new aws.S3({
     endpoint: process.env.S3_ENDPOINT,
     signatureVersion: 'v4',
@@ -105,7 +109,7 @@ router.get("/activities/:activityId", async (req, res, next) => {
     }
 });
 
-router.post("/activities/:activityId", async (req, res, next) => {
+router.post("/activities/:activityId", isProvider, async (req, res, next) => {
     try {
         let activity = await Activity.findByIdAndUpdate(req.params.activityId, req.body.activity, {
             new: true

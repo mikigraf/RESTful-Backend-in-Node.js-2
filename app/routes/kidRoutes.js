@@ -1,6 +1,10 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
+
+const isParent = require('../middlewares/isParent');
+const isProvider = require('../middlewares/isProvider');
+
 const {
     Kid
 } = require("../db/index");

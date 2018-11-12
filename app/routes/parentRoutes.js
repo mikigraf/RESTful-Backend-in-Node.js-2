@@ -8,6 +8,8 @@ const {
 const isAdmin = require("../middlewares/isAdmin");
 const isAdminOrTargetUser = require("../middlewares/isAdminOrTargetUser");
 const isAdminOrTargetParent = require('../middlewares/isAdminOrTargetParent')
+const isParent = require('../middlewares/isParent');
+const isProvider = require('../middlewares/isProvider');
 
 router.get('/parents', isAdmin, async (req, res, next) => {
     try {
@@ -149,7 +151,7 @@ router.delete('/parents/:userId', isAdminOrTargetParent, async (req, res, next) 
 });
 
 // add 1 kid
-router.post('/parents/:userId/kids', async (req, res, next) => {
+router.post('/parents/:userId/kids', isAdminOrTargetParent, async (req, res, next) => {
     try {
         let new_kid = req.body.kid;
         let created_kid = await Kid.create(new_kid);

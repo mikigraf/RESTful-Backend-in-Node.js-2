@@ -43,6 +43,9 @@ require('./app/config/passportConfig')(passport);
  */
 require('./app/db/index');
 
+const isParent = require('./app/middlewares/isParent');
+const isProvider = require('./app/middlewares/isProvider');
+
 const authRoutes = require('./app/routes/authRoutes');
 app.use('/api/auth/', authRoutes);
 
@@ -50,16 +53,16 @@ const activityRoutes = require('./app/routes/activityRoutes');
 app.use('/api/', activityRoutes);
 
 const bookingRoutes = require('./app/routes/bookingRoutes');
-app.use('/api/', bookingRoutes);
+app.use('/api/', passport.authenticate('jwt'), bookingRoutes);
 
 const kidRoutes = require('./app/routes/kidRoutes');
-app.use('/api/', kidRoutes);
+app.use('/api/', passport.authenticate('jwt'), kidRoutes);
 
 const parentRoutes = require('./app/routes/parentRoutes');
-app.use('/api/', parentRoutes);
+app.use('/api/', [passport.authenticate('jwt'), isParent], parentRoutes);
 
 const providerRoutes = require('./app/routes/providerRoutes');
-app.use('/api/', providerRoutes);
+app.use('/api/', [passport.authenticate('jwt'), isProvider], providerRoutes);
 
 const userRoutes = require('./app/routes/userRoutes');
 app.use('/api/', userRoutes);

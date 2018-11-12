@@ -5,7 +5,7 @@ const router = express.Router();
 const pswgen = require('generate-password');
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
-//const twilioClient = require('twilio')(accountSid, authToken);
+const twilioClient = require('twilio')(accountSid, authToken);
 
 /**
  * @api {post} /signup Register 
@@ -118,14 +118,14 @@ router.post('/providers/forgot', async (req, res, next) => {
 
             user.save();
             let phone_number = user.mobilePhoneNumber;
-            // twilioClient.messages
-            //     .create({
-            //         body: 'This is your new password for Kidshub: ' + password,
-            //         from: process.env.TWILIO_PHONE_NUMBER,
-            //         to: phoneNumber
-            //     })
-            //     .then(message => console.log(message.sid))
-            //     .done();
+            twilioClient.messages
+                .create({
+                    body: 'This is your new password for Kidshub: ' + password,
+                    from: process.env.TWILIO_PHONE_NUMBER,
+                    to: phoneNumber
+                })
+                .then(message => console.log(message.sid))
+                .done();
             res.send(200);
         }
     } catch (error) {

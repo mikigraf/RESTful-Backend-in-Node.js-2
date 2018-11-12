@@ -7,6 +7,8 @@ const {
 const isAdmin = require("../middlewares/isAdmin");
 const isAdminOrTargetUser = require("../middlewares/isAdminOrTargetUser");
 const isAdminOrTargetProvider = require('../middlewares/isAdminOrTargetProvider')
+const isParent = require('../middlewares/isParent');
+const isProvider = require('../middlewares/isProvider');
 
 router.get('/providers', async (req, res, next) => {
     try {
