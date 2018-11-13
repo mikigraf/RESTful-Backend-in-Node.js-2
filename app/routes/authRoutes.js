@@ -39,7 +39,6 @@ router.post('/login', async (req, res, next) => {
     if (req.body.type.localeCompare('parent')) {
         passport.authenticate('parentLogin', async (err, user, info) => {
             try {
-                console.log("LOGIN authroutes");
                 req.login(user, {
                     session: false
                 }, async (error) => {
@@ -63,11 +62,6 @@ router.post('/login', async (req, res, next) => {
     } else if (req.body.type.localeCompare('provider')) {
         passport.authenticate('parentLogin', async (err, user, info) => {
             try {
-                console.log("LOGIN authroutes");
-                if (err || !user) {
-                    const error = new Error('An error occured');
-                    return next(error);
-                }
                 req.login(user, {
                     session: false
                 }, async (error) => {
