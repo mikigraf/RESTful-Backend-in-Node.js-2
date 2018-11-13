@@ -10,11 +10,25 @@ const {
 } = require("../db/index");
 const isAdmin = require("../middlewares/isAdmin");
 router.get('/kids/:kidId', async (req, res, next) => {
+    try {
+        let kid = await Kid.findById(req.params.kidId);
+        if (!kid) {
+            res.status(500).send('Internal server error');
+        }
 
+        res.status(200).json(kid);
+    } catch (error) {
+        res.status(500).send('Internal server error');
+    }
 });
 router.post('/kids/:kidId', async (req, res, next) => {
     try {
+        let kid = await Kid.findByIdAndUpdate(req.params.kidId, req.body.kid);
+        if (!kid) {
+            res.status(500).send('Internal server error');
+        }
 
+        res.status(200).json(kid);
     } catch (error) {
         res.status(500).send('Internal server error');
     }
