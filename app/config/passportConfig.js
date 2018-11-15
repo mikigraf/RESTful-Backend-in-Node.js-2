@@ -190,7 +190,6 @@ module.exports = function (passport) {
             let err, user = await Parent.findOne({
                 id: jwt_payload.sub
             });
-            console.log("jwt strategy');")
             if (err) {
                 let user = await Provider.findOne({
                     id: jwt_payload.sub

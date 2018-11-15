@@ -60,7 +60,7 @@ router.post('/login', async (req, res, next) => {
             }
         })(req, res, next);
     } else if (req.body.type.localeCompare('provider')) {
-        passport.authenticate('parentLogin', async (err, user, info) => {
+        passport.authenticate('providerLogin', async (err, user, info) => {
             try {
                 req.login(user, {
                     session: false

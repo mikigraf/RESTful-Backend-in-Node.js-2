@@ -48,7 +48,6 @@ describe("Provider", () => {
             .then(res => {
                 expect(res.body).to.have.property("token");
                 provider_token = `Bearer ${res.body.token}`;
-                console.log(provider_token);
                 done();
             });
     });

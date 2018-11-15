@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 async function isProvider(req, res, next) {
     try {
         let user = await Provider.findById(req.user._id);
+        console.log("USER: " + JSON.stringify(user));
         if (user.type.localeCompare('provider') === '0' || user.type.localeCompare('admin') === '0') {
             next();
         }

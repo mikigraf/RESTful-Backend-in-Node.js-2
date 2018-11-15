@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 async function isParent(req, res, next) {
     try {
         let user = await Parent.findById(req.user._id);
+        console.log("USER: " + JSON.stringify(user));
         if (user.type.localeCompare('parent') === '0' || user.type.localeCompare('admin') === '0') {
             next();
         }

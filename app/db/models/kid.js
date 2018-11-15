@@ -12,6 +12,10 @@ dotenv.load({
 });
 
 const kidSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true
+    },
     parent: {
         type: Schema.Types.ObjectId,
         ref: 'Parent'
