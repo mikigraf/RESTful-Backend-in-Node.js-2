@@ -53,23 +53,6 @@ describe("Parents", () => {
             });
     });
 
-    describe("/GET test", () => {
-        it("should test the route for authenticated user", done => {
-            Parent.findOne({
-                username: parent1.username
-            }).then(user => {
-                chai
-                    .request(server)
-                    .get("/api/auth/test")
-                    .set("authorization", parent_token)
-                    .end((err, res) => {
-                        res.should.have.status(200);
-                        done();
-                    })
-            })
-        })
-    });
-
     describe("/POST kid", () => {
         it("should create new child for this parent", done => {
             Parent.findOne({
@@ -81,6 +64,7 @@ describe("Parents", () => {
                     .set('content-type', 'application/json')
                     .send({
                         kid: {
+                            name: 'John',
                             parent: user._id,
                             age: 12,
                             gender: 'male'
@@ -102,6 +86,7 @@ describe("Parents", () => {
                     .set('authorization', parent_token)
                     .end((err, res) => {
                         res.should.have.status(200);
+                        done();
                     })
             });
         })

@@ -49,8 +49,6 @@ router.get('/parents', isAdmin, async (req, res, next) => {
 
 router.get('/parents/:userId', async (req, res, next) => {
     try {
-        console.log("USER: ++ : " + req.user);
-        console.log("REQ: " + JSON.stringify(req));
         let user = await Parent.findById(req.params.userId);
         user.password = "";
         res.status(200).json(user);
@@ -174,7 +172,7 @@ router.get('/parents/:userId/kids', async (req, res, next) => {
     } catch (error) {
         res.status(500).send('Internal server error');
     }
-})
+});
 // delete 1 kid
 router.delete('/parents/:userId/kids', isAdminOrTargetUser, async (req, res, next) => {
     try {
