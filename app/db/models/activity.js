@@ -48,22 +48,20 @@ const activitySchema = new mongoose.Schema({
         }
     },
 
-    ratings: {
+    ratings: [{
         value: {
-            type: Number,
-            required: true
+            type: Number
         },
         voter: {
             type: Schema.Types.ObjectId,
             ref: 'Parent'
         }
 
-    },
+    }],
 
     pictures: [{
         url: {
-            type: String,
-            required: true
+            type: String
         },
         upload_date: {
             type: Date,
@@ -77,8 +75,7 @@ const activitySchema = new mongoose.Schema({
     },
 
     startDays: [{
-        type: Date,
-        required: true
+        type: Date
     }],
 
     provider: {

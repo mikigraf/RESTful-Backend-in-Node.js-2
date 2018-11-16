@@ -60,37 +60,30 @@ router.get("/activities", async (req, res, next) => {
     }
 });
 
-router.post("/activities", isAdmin, async (req, res, next) => {
+router.put("/activities", isProvider, async (req, res, next) => {
     try {
-        var page = parseInt(req.query.page) || 0;
-        var limit = parseInt(req.query.limit) || 100;
+        const activity = new Activity({
+            title: req.body.activity.title,
+            categories: req.body.activity.categories,
+            description: req.body.activity.description,
+            price: req.body.activity.price || 0,
+            location: {
+                city: req.body.activity.location.city,
+                street: req.body.activity.location.street,
+                gps: {
+                    lan: req.body.activity.location.gps.lan,
+                    lon: req.body.activity.location.gps.lon
+                },
+            },
+            pictures: req.body.activity.pictures || [],
+            periodInDays: req.body.activity.periodInDays || 0,
+            startDays: req.body.activity.startDays || [],
+            provider: req.body.user._id
+        });
 
-        if (Object.keys(req.query).length === 0) {
-            // no query parameters, find all users without any filtering
-            let activities = await Activity.find({}).skip(page * limit).limit(limit);
-            let count = await Activity.find({}).coundDocuments();
-            if (!activities) {
-                res.status(404).send('It seems like there are no users');
-            }
+        activity.save();
 
-            const ids = activities.map(u => u._id);
-
-            res.status(200).json({
-                'count': count,
-                'items': ids
-            });
-        } else {
-            // query parameters are specified
-            let activities = await Activity.find(req.query);
-            if (!activities) {
-                res.status(404).send('It seems like there are no providers');
-            }
-
-            const ids = activities.map(u => u._id);
-            res.status(200).json({
-                'items': ids
-            });
-        }
+        res.status(200).json(activity);
     } catch (error) {
         res.status(500).send('Internal server error');
     }
