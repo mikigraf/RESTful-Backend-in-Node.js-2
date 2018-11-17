@@ -15,10 +15,11 @@ async function isProvider(req, res, next) {
                 next();
             }
         } else if (req.user.type.localeCompare('provider') === 0) {
+            console.log("TYPE");
             let user = await Provider.findOne({
                 username: req.user.username
             });
-            if (user.type.localCompare('provider') === 0) {
+            if (user) {
                 next();
             }
         } else {

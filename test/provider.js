@@ -1,5 +1,13 @@
 const mongoose = require("mongoose");
-const Provider = require("../app/db/models/provider");
+const {
+    Activity,
+    Booking,
+    Kid,
+    Parent,
+    Provider,
+    User
+} = require('../app/db/index');
+
 
 const chai = require("chai");
 const chaiHttp = require("chai-http");
@@ -27,7 +35,12 @@ var provider_token = "";
 
 describe("Provider", () => {
     before(done => {
+        User.deleteMany({}, () => {});
+        Kid.deleteMany({}, () => {});
         Provider.deleteMany({}, () => {});
+        Activity.deleteMany({}, () => {});
+        Parent.deleteMany({}, () => {});
+        Booking.deleteMany({}, () => {});
         request(server)
             .post("/api/auth/signup")
             .send(provider1)
@@ -75,8 +88,8 @@ describe("Provider", () => {
                                     lon: '55.5555'
                                 },
                             },
-                            periodInDays: 1
-                            // startDays: [Date.now()]
+                            periodInDays: 1,
+                            startDays: [Date.now()]
                         }
                     }).end((err, res) => {
                         res.should.have.status(200);

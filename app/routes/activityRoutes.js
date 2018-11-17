@@ -63,6 +63,7 @@ router.get("/activities", async (req, res, next) => {
 
 router.put("/activities", isProvider, async (req, res, next) => {
     try {
+        console.log("/ACITIVTIES");
         const activity = {
             title: req.body.activity.title,
             categories: req.body.activity.categories,

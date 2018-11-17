@@ -1,5 +1,13 @@
 const mongoose = require("mongoose");
-const Parent = require("../app/db/models/parent");
+const {
+    Activity,
+    Booking,
+    Kid,
+    Parent,
+    Provider,
+    User
+} = require('../app/db/index');
+
 
 const chai = require("chai");
 const chaiHttp = require("chai-http");
@@ -27,7 +35,12 @@ var parent_token = "";
 
 describe("Parents", () => {
     before(done => {
-        Parent.deleteMany({}, () => {});;
+        User.deleteMany({}, () => {});
+        Kid.deleteMany({}, () => {});
+        Provider.deleteMany({}, () => {});
+        Activity.deleteMany({}, () => {});
+        Parent.deleteMany({}, () => {});
+        Booking.deleteMany({}, () => {});
         request(server)
             .post("/api/auth/signup")
             .send(parent1)

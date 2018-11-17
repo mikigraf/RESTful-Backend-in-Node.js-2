@@ -1,5 +1,12 @@
 const mongoose = require("mongoose");
-const User = require("../app/db/models/user");
+const {
+    Activity,
+    Booking,
+    Kid,
+    Parent,
+    Provider,
+    User
+} = require('../app/db/index');
 
 const chai = require("chai");
 const chaiHttp = require("chai-http");
@@ -25,7 +32,12 @@ var admin_token = "";
 
 describe("Admins", () => {
     before(done => {
-        User.deleteMany({}, () => {});;
+        User.deleteMany({}, () => {});
+        Kid.deleteMany({}, () => {});
+        Provider.deleteMany({}, () => {});
+        Activity.deleteMany({}, () => {});
+        Parent.deleteMany({}, () => {});
+        Booking.deleteMany({}, () => {});
         request(server)
             .post("/api/auth/signup")
             .send(admin1)

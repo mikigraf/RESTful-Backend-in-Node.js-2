@@ -6,16 +6,19 @@ const mongoose = require('mongoose');
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 mongoose.set('useNewUrlParser', true);
-if (process.env.env === 'DEV') {
-    mongoose.connect(process.env.MONGODB_URI_DEV, {
-        keepAlive: true
-    });
-} else {
-    // production
-    mongoose.connect(process.env.MONGODB_URI, {
-        keepAlive: true
-    });
-}
+mongoose.connect('mongodb://adminek:adminek1@ds253243.mlab.com:53243/kidshub-dev', {
+    keepAlive: true
+});
+// if (process.env.localeCompare('DEV') === 0) {
+//     mongoose.connect(process.env.MONGODB_URI_DEV, {
+//         keepAlive: true
+//     });
+// } else {
+//     // production
+//     mongoose.connect(process.env.MONGODB_URI, {
+//         keepAlive: true
+//     });
+// }
 
 mongoose.connection.on('connected', (success) => {
     console.log(chalk.green('✓ '), chalk.green('MongoDB connection was succesful.'));

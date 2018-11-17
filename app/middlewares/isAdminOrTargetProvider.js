@@ -6,27 +6,20 @@ const jwt = require('jsonwebtoken');
 
 async function isAdminOrTargetProvider(req, res, next) {
     try {
-        if (req.user.type.localeCompare('admin') === 0) {
-            let user = await User.findOne({
-                username: req.user.username
-            });
+        let user = await Provider.findById(req.user._id);
+        if (user.type.localeCompare('admin') === '0') {
+            next();
+        }
 
-            if (user.type.localeCompare('admin') === 0) {
-                next();
-            }
-        } else if (req.user.type.localeCompare('provider') === 0) {
-            let user = await Provider.findOne({
-                username: req.user.username
-            });
-            if (user.type.localCompare('provider') === 0) {
-                next();
-            }
-        } else {
-            res.staus(401);
+        if (req.user._id === req.params.userId) {
+            next();
         }
     } catch (error) {
         res.status(401);
+        next(error);
     }
+    res.status(401);
+    next();
 }
 
 module.exports = isAdminOrTargetProvider;
