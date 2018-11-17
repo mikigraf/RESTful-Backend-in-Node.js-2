@@ -36,56 +36,79 @@ router.post('/signup', passport.authenticate('signup', {
  * 
  */
 router.post('/login', async (req, res, next) => {
-    if (req.body.type.localeCompare('parent')) {
-        passport.authenticate('parentLogin', async (err, user, info) => {
-            try {
-                req.login(user, {
-                    session: false
-                }, async (error) => {
-                    if (error) return next(error);
+    passport.authenticate('login', async (err, user, info) => {
+        try {
+            req.login(user, {
+                session: false
+            }, async (error) => {
+                if (error) return next(error);
 
-                    const body = {
-                        _id: user._id,
-                        username: user.username
-                    };
-                    const token = jwt.sign({
-                        user: body
-                    }, process.env.JWT_SECRET);
-                    return res.json({
-                        token
-                    });
+                const body = {
+                    _id: user._id,
+                    username: user.username
+                };
+                const token = jwt.sign({
+                    user: body
+                }, process.env.JWT_SECRET);
+                return res.json({
+                    token
                 });
-            } catch (error) {
-                return next(error);
-            }
-        })(req, res, next);
-    } else if (req.body.type.localeCompare('provider')) {
-        passport.authenticate('providerLogin', async (err, user, info) => {
-            try {
-                req.login(user, {
-                    session: false
-                }, async (error) => {
-                    if (error) return next(error);
-
-                    const body = {
-                        _id: user._id,
-                        username: user.username
-                    };
-                    const token = jwt.sign({
-                        user: body
-                    }, process.env.JWT_SECRET);
-                    return res.json({
-                        token
-                    });
-                });
-            } catch (error) {
-                return next(error);
-            }
-        })(req, res, next);
-    }
-
+            });
+        } catch (error) {
+            return next(error);
+        }
+    })(req, res, next);
 });
 
+
+router.post('/login/parent', async (req, res, next) => {
+    passport.authenticate('parentLogin', async (err, user, info) => {
+        try {
+            req.login(user, {
+                session: false
+            }, async (error) => {
+                if (error) return next(error);
+
+                const body = {
+                    _id: user._id,
+                    username: user.username
+                };
+                const token = jwt.sign({
+                    user: body
+                }, process.env.JWT_SECRET);
+                return res.json({
+                    token
+                });
+            });
+        } catch (error) {
+            return next(error);
+        }
+    })(req, res, next);
+})
+router.post('/login/provider', async (req, res, next) => {
+    passport.authenticate('providerLogin', async (err, user, info) => {
+        try {
+            req.login(user, {
+                session: false
+            }, async (error) => {
+                if (error) return next(error);
+
+                const body = {
+                    _id: user._id,
+                    username: user.username
+                };
+                const token = jwt.sign({
+                    user: body
+                }, process.env.JWT_SECRET);
+                return res.json({
+                    token
+                });
+            });
+        } catch (error) {
+            return next(error);
+        }
+    })(req, res, next);
+});
 /**
  * @api {post} /forgot Forgot Password 
  * @apiName Remind users password

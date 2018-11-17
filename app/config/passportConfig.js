@@ -127,59 +127,40 @@ module.exports = function (passport) {
         }
     }));
 
-    // passport.use('login', new LocalStrategy({
-    //     usernameField: 'username',
-    //     passwordField: 'password'
-    // }, async (username, password, done) => {
-    //     try {
-    //         // check status of the user. If the user is provider, then fetch data from provider model, otherwise fetch data from parents model.
-    //         if (typeof req.body.type === 'undefined') {
-    //             // login type hasn't been specified.
-    //             console.log("req body type undefined");
-    //             const error = new Error('Login type wasn\'t specified');
-    //             return next(error);
-    //         }
+    passport.use('login', new LocalStrategy({
+        usernameField: 'username',
+        passwordField: 'password'
+    }, async (username, password, done) => {
+        try {
+            const user = await User.findOne({
+                'username': username
+            });
 
-    //         const login_type = req.body.type;
-    //         console.log("LOGIN_TYPE: " + login_type);
 
-    //         var user = null;
 
-    //         if (login_type.localeCompare('parent') === 0) {
-    //             // find user in parent table
-    //             console.log("find parent");
-    //             user = await parent.findOne({
-    //                 'username': username
-    //             });
-    //         } else if (login_type.localeCompare('provider') === 0) {
-    //             user = await Provider.findOne({
-    //                 'username': username
-    //             });
-    //         }
+            // User wasn't found
+            if (!user) {
+                return done(null, false, {
+                    message: 'Wrong username or password.'
+                });
+            }
 
-    //         // User wasn't found
-    //         if (!user) {
-    //             return done(null, false, {
-    //                 message: 'Wrong username or password.'
-    //             });
-    //         }
+            // Password compare passwords
+            const isMatch = await user.comparePassword(password);
+            if (!isMatch) {
+                return done(null, false, {
+                    message: 'Wrong username or password.'
+                });
+            }
 
-    //         // Password compare passwords
-    //         const isMatch = await user.comparePassword(password);
-    //         if (!isMatch) {
-    //             return done(null, false, {
-    //                 message: 'Wrong username or password.'
-    //             });
-    //         }
-
-    //         // If everything went ok, send user information to the next middleware
-    //         return done(null, user, {
-    //             message: 'Logged in successfully'
-    //         });
-    //     } catch (error) {
-    //         done(error);
-    //     }
-    // }));
+            // If everything went ok, send user information to the next middleware
+            return done(null, user, {
+                message: 'Logged in successfully'
+            });
+        } catch (error) {
+            done(error);
+        }
+    }));
 
     var opts = {
         jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

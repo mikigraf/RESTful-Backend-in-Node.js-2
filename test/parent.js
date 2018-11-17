@@ -38,7 +38,7 @@ describe("Parents", () => {
 
     beforeEach(done => {
         request(server)
-            .post("/api/auth/login")
+            .post("/api/auth/login/parent")
             .send({
                 username: parent1.username,
                 password: parent1.password,

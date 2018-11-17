@@ -38,7 +38,7 @@ describe("Provider", () => {
 
     beforeEach(done => {
         request(server)
-            .post("/api/auth/login")
+            .post("/api/auth/login/provider")
             .send({
                 username: provider1.username,
                 password: provider1.password,
