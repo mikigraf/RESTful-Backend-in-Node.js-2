@@ -16,7 +16,6 @@ chai.use(chaiJsonEqual);
 chai.use(chaiHttp);
 
 const admin1 = {
-    email: "1@admin.com",
     username: "admin",
     password: "admin",
     type: "admin"

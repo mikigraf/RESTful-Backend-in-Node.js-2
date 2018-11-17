@@ -13,18 +13,16 @@ const isProvider = require('../middlewares/isProvider');
 
 router.get('/parents', isAdmin, async (req, res, next) => {
     try {
-        console.log("/parents : " + req.user);
         var page = parseInt(req.query.page) || 0;
         var limit = parseInt(req.query.limit) || 100;
 
         if (Object.keys(req.query).length === 0) {
             // no query parameters, find all users without any filtering
             let users = await Parent.find({}).skip(page * limit).limit(limit);
-            let count = await Parent.find({}).coundDocuments();
+            let count = await Parent.find({}).countDocuments();
             if (!users) {
                 res.status(404).send('It seems like there are no users');
             }
-
             const ids = users.map(u => u._id);
 
             res.status(200).json({

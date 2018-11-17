@@ -57,7 +57,8 @@ router.post('/login', async (req, res, next) => {
                 }
                 const body = {
                     _id: user._id,
-                    username: user.username
+                    username: user.username,
+                    type: user.type
                 };
                 const token = jwt.sign({
                     user: body
@@ -90,7 +91,8 @@ router.post('/login/parent', async (req, res, next) => {
 
                 const body = {
                     _id: user._id,
-                    username: user.username
+                    username: user.username,
+                    type: user.type
                 };
                 const token = jwt.sign({
                     user: body
@@ -121,7 +123,8 @@ router.post('/login/provider', async (req, res, next) => {
 
                 const body = {
                     _id: user._id,
-                    username: user.username
+                    username: user.username,
+                    type: user.type
                 };
                 const token = jwt.sign({
                     user: body

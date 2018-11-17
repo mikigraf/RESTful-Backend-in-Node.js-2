@@ -5,8 +5,8 @@ const jwt = require('jsonwebtoken');
 
 async function isAdmin(req, res, next) {
     try {
-        console.log("is admin: " + req.user);
-        if (req.user.type.localeCompare('admin') === '0') {
+        let user = await User.findById(req.user.id);
+        if (user.type.localeCompare('admin') === '0') {
             next();
         }
     } catch (error) {

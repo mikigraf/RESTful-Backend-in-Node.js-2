@@ -23,7 +23,7 @@ router.get('/bookings', async (req, res, next) => {
         if (Object.keys(req.query).length === 0) {
             // no query parameters, find all users without any filtering
             let items = await Booking.find({}).skip(page * limit).limit(limit);
-            let count = await Booking.find({}).coundDocuments();
+            let count = await Booking.find({}).countDocuments();
             if (!items) {
                 res.status(404).send('It seems like there are no kids');
             }

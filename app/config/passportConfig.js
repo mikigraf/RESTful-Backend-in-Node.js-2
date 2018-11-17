@@ -13,7 +13,6 @@ const {
 
 module.exports = function (passport) {
     passport.serializeUser((user, done) => {
-        console.log("serialize user: " + user);
         done(null, user.id);
     });
 
@@ -200,34 +199,53 @@ module.exports = function (passport) {
     };
     passport.use(new JwtStrategy(opts, async (jwt_payload, done) => {
         try {
-            var err, user = await Parent.findOne({
-                id: jwt_payload.sub
-            });
-            if (user === null) {
-                err,
-                user = await Provider.findOne({
-                    id: jwt_payload.sub
-                });
-
-                if (user === null) {
-                    user = await User.findOne({
-                        id: jwt_payload.sub
-                    });
-                    if (user) {
-                        return done(null, user);
-                    }
-                }
+            console.log("jwt_payload.user: " + JSON.stringify(jwt_payload.user));
+            if (jwt_payload.user.type === 'admin') {
+                let user = await User.findById(jwt_payload.user._id);
                 if (user) {
                     return done(null, user);
-                } else if (error) {
-                    return done(null, false);
+                }
+            } else if (jwt_payload.user.type === 'parent') {
+                let user = await Parent.findById(jwt_payload.user._id);
+                if (user) {
+                    return done(null, user);
+                }
+            } else if (jwt_payload.user.type === 'provider') {
+                let user = await Provider.findById(jwt_payload.user._id);
+                if (user) {
+                    return done(null, user);
                 }
             }
-            if (user) {
-                return done(null, user);
-            } else {
-                return done(null, false);
-            }
+
+            return done(null, false);
+            // var err, user = await Parent.findOne({
+            //     id: jwt_payload.sub
+            // });
+            // if (user === null) {
+            //     err,
+            //     user = await Provider.findOne({
+            //         id: jwt_payload.sub
+            //     });
+
+            //     if (user === null) {
+            //         user = await User.findOne({
+            //             id: jwt_payload.sub
+            //         });
+            //         if (user) {
+            //             return done(null, user);
+            //         }
+            //     }
+            //     if (user) {
+            //         return done(null, user);
+            //     } else if (error) {
+            //         return done(null, false);
+            //     }
+            // }
+            // if (user) {
+            //     return done(null, user);
+            // } else {
+            //     return done(null, false);
+            // }
         } catch (error) {
             done(error);
         }

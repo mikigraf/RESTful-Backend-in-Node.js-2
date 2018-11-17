@@ -18,7 +18,7 @@ router.get('/users', isAdmin, async (req, res, next) => {
         if (Object.keys(req.query).length === 0) {
             // no query parameters, find all users without any filtering
             let users = await User.find({}).skip(page * limit).limit(limit);
-            let count = await User.find({}).coundDocuments();
+            let count = await User.find({}).countDocuments();
             if (!users) {
                 res.status(404).send('It seems like there are no users');
             }
