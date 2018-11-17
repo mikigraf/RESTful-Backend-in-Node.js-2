@@ -7,12 +7,31 @@ const pswgen = require('generate-password');
 
 const {
     Parent,
-    Provider
+    Provider,
+    User
 } = require('../db/index');
 
 module.exports = function (passport) {
     passport.serializeUser((user, done) => {
+        console.log("serialize user: " + user);
         done(null, user.id);
+    });
+
+    passport.deserializeUser((id, done) => {
+        console.log("deserialize id: " + id);
+        User.findById(id, (err, user) => {
+            if (err || !user) {
+                Parent.findById(id, (err, user) => {
+                    if (err || !user) {
+                        Provider.findById(id, (err, user) => {
+                            done(err, user);
+                        })
+                    }
+                    done(err, user);
+                })
+            }
+            done(err, user);
+        });
     });
 
     passport.use('signup', new LocalStrategy({
@@ -22,10 +41,11 @@ module.exports = function (passport) {
     }, async (req, username, password, done) => {
         const email = req.body.email;
         const type = req.body.type;
-        const mobilePhoneNumber = req.body.mobilePhoneNumber;
+
 
         if (type.localeCompare("parent") === 0) {
             try {
+                const mobilePhoneNumber = req.body.mobilePhoneNumber;
                 const parent = await Parent.create({
                     'email': email,
                     'username': username,
@@ -42,6 +62,7 @@ module.exports = function (passport) {
 
         if (type.localeCompare('provider') === 0) {
             try {
+                const mobilePhoneNumber = req.body.mobilePhoneNumber;
                 const provider = await Provider.create({
                     'email': email,
                     'username': username,
@@ -50,6 +71,19 @@ module.exports = function (passport) {
                     'mobilePhoneNumber': mobilePhoneNumber
                 });
                 done(provider);
+            } catch (error) {
+                done(error);
+            }
+        }
+
+        if (type.localeCompare('admin') === 0) {
+            try {
+                console.log("Creating admin");
+                const user = await User.create({
+                    'username': username,
+                    'password': password
+                });
+                done(user);
             } catch (error) {
                 done(error);
             }
@@ -70,6 +104,7 @@ module.exports = function (passport) {
 
             // User wasn't found
             if (!user) {
+
                 return done(null, false, {
                     message: 'Wrong username or password.'
                 });
@@ -78,6 +113,7 @@ module.exports = function (passport) {
             // Password compare passwords
             const isMatch = await user.comparePassword(password);
             if (!isMatch) {
+
                 return done(null, false, {
                     message: 'Wrong username or password.'
                 });
@@ -127,7 +163,7 @@ module.exports = function (passport) {
         }
     }));
 
-    passport.use('login', new LocalStrategy({
+    passport.use('adminLogin', new LocalStrategy({
         usernameField: 'username',
         passwordField: 'password'
     }, async (username, password, done) => {
@@ -135,9 +171,6 @@ module.exports = function (passport) {
             const user = await User.findOne({
                 'username': username
             });
-
-
-
             // User wasn't found
             if (!user) {
                 return done(null, false, {
@@ -152,7 +185,6 @@ module.exports = function (passport) {
                     message: 'Wrong username or password.'
                 });
             }
-
             // If everything went ok, send user information to the next middleware
             return done(null, user, {
                 message: 'Logged in successfully'
@@ -168,13 +200,23 @@ module.exports = function (passport) {
     };
     passport.use(new JwtStrategy(opts, async (jwt_payload, done) => {
         try {
-            let err, user = await Parent.findOne({
+            var err, user = await Parent.findOne({
                 id: jwt_payload.sub
             });
-            if (err) {
-                let user = await Provider.findOne({
+            if (user === null) {
+                err,
+                user = await Provider.findOne({
                     id: jwt_payload.sub
                 });
+
+                if (user === null) {
+                    user = await User.findOne({
+                        id: jwt_payload.sub
+                    });
+                    if (user) {
+                        return done(null, user);
+                    }
+                }
                 if (user) {
                     return done(null, user);
                 } else if (error) {

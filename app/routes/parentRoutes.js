@@ -13,6 +13,7 @@ const isProvider = require('../middlewares/isProvider');
 
 router.get('/parents', isAdmin, async (req, res, next) => {
     try {
+        console.log("/parents : " + req.user);
         var page = parseInt(req.query.page) || 0;
         var limit = parseInt(req.query.limit) || 100;
 

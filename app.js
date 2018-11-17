@@ -50,7 +50,7 @@ const authRoutes = require('./app/routes/authRoutes');
 app.use('/api/auth/', authRoutes);
 
 const activityRoutes = require('./app/routes/activityRoutes');
-app.use('/api/', activityRoutes);
+app.use('/api/', passport.authenticate('jwt'), activityRoutes);
 
 const bookingRoutes = require('./app/routes/bookingRoutes');
 app.use('/api/', passport.authenticate('jwt'), bookingRoutes);

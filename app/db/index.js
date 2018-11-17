@@ -29,8 +29,8 @@ mongoose.connection.on('error', (err) => {
 
 module.exports.Parent = require("./models/parent");
 module.exports.Provider = require("./models/provider");
-module.exports.User = require("./models/user");
 module.exports.Kid = require("./models/kid");
+module.exports.User = require("./models/user");
 
 module.exports.Activity = require("./models/activity");
 module.exports.Booking = require("./models/booking");

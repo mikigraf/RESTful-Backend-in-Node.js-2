@@ -10,6 +10,7 @@ var uuidv4 = require('uuid/v4');
 
 const isParent = require('../middlewares/isParent');
 const isProvider = require('../middlewares/isProvider');
+const isAdminOrTargetProvider = require('../middlewares/isAdminOrTargetProvider');
 
 
 var s3 = new aws.S3({
@@ -62,7 +63,7 @@ router.get("/activities", async (req, res, next) => {
 
 router.put("/activities", isProvider, async (req, res, next) => {
     try {
-        const activity = new Activity({
+        const activity = {
             title: req.body.activity.title,
             categories: req.body.activity.categories,
             description: req.body.activity.description,
@@ -78,12 +79,15 @@ router.put("/activities", isProvider, async (req, res, next) => {
             pictures: req.body.activity.pictures || [],
             periodInDays: req.body.activity.periodInDays || 0,
             startDays: req.body.activity.startDays || [],
-            provider: req.body.user._id
-        });
+            provider: req.body.activity.provider
+        };
 
-        activity.save();
+        let created_activity = await Activity.create(activity);
+        res.status(200).json(created_activity);
 
-        res.status(200).json(activity);
+        // activity.save();
+
+        // res.status(200).json(activity);
     } catch (error) {
         res.status(500).send('Internal server error');
     }
