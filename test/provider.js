@@ -99,4 +99,21 @@ describe("Provider", () => {
         });
     });
 
+    describe("/GET activites by ID", () => {
+        it("should get activity data by ID", done => {
+            Activity.findOne({
+                title: 'Test Acitivty'
+            }).then(activity => {
+                console.log("activity: " + activity);
+                chai.request(server).get(`/api/activities/${activity._id}`).set(`authorization`, provider_token).set('content-type', 'application/json').end((err, res) => {
+                    res.should.have.status(200);
+                    expect(activity.description).to.equal('Fun activity that teaches kids alot');
+                    done();
+                })
+            });
+        })
+    })
+
+
+
 })

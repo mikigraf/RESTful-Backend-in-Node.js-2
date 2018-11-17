@@ -123,9 +123,11 @@ router.post("/activities/:activityId", isProvider, async (req, res, next) => {
     }
 });
 
-router.delete("/activities/:activityId", async (req, res, next) => {
+router.delete("/activities/:activityId", isAdmin, async (req, res, next) => {
     try {
+        let activity = await Activity.remove(req.params.activityId);
 
+        res.status(200);
     } catch (error) {
         res.status(500).send('Internal server error');
     }
