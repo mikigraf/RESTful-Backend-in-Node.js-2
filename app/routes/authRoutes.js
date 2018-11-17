@@ -38,9 +38,6 @@ router.post('/signup', passport.authenticate('signup', {
 router.post('/login', async (req, res, next) => {
     passport.authenticate('adminLogin', async (err, user, info) => {
         try {
-            console.log("user login: " + user);
-            console.log("error: " + err);
-            console.log("info: " + JSON.stringify(info));
             if (err || !user) {
                 console.log("err: " + err);
                 console.log("Err: user: " + user);
@@ -51,7 +48,6 @@ router.post('/login', async (req, res, next) => {
                 session: false
             }, async (error) => {
                 if (error) return next(error);
-                console.log("user login: " + user);
                 if (!user) {
                     return next(error);
                 }
@@ -77,9 +73,6 @@ router.post('/login', async (req, res, next) => {
 router.post('/login/parent', async (req, res, next) => {
     passport.authenticate('parentLogin', async (err, user, info) => {
         try {
-            console.log("user login: " + user);
-            console.log("error: " + err);
-            console.log("info: " + JSON.stringify(info));
             if (err || !user) {
                 const error = new Error('An error occured');
                 return next(error);
@@ -109,9 +102,6 @@ router.post('/login/parent', async (req, res, next) => {
 router.post('/login/provider', async (req, res, next) => {
     passport.authenticate('providerLogin', async (err, user, info) => {
         try {
-            console.log("user login: " + user);
-            console.log("error: " + err);
-            console.log("info: " + JSON.stringify(info));
             if (err || !user) {
                 const error = new Error('An error occured');
                 return next(error);

@@ -1,19 +1,32 @@
 const {
-    Provider
+    Provider,
+    User
 } = require('../db/index');
 const jwt = require('jsonwebtoken');
 
 async function isProvider(req, res, next) {
     try {
-        if (req.user.type.localeCompare('provider') === '0' || req.user.type.localeCompare('admin') === '0') {
-            next(req.user);
+        if (req.user.type.localeCompare('admin') === 0) {
+            let user = await User.findOne({
+                username: req.user.username
+            });
+
+            if (user.type.localeCompare('admin') === 0) {
+                next();
+            }
+        } else if (req.user.type.localeCompare('provider') === 0) {
+            let user = await Provider.findOne({
+                username: req.user.username
+            });
+            if (user.type.localCompare('provider') === 0) {
+                next();
+            }
+        } else {
+            res.staus(401);
         }
     } catch (error) {
-        res.status(500);
-        next(error);
+        res.status(401);
     }
-    res.status(401);
-    next();
 }
 
 module.exports = isProvider;

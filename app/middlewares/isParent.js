@@ -6,23 +6,27 @@ const jwt = require('jsonwebtoken');
 
 async function isParent(req, res, next) {
     try {
-        console.log("isParent user: " + req.user);
-        var user = null;
         if (req.user.type.localeCompare('admin') === 0) {
-            user = await User.findById(req.user._id);
-        } else if (req.user.type.localeCompare('parent') === 0) {
-            user = await Parent.findById(req.user._id);
-        }
+            let user = await User.findOne({
+                username: req.user.username
+            });
 
-        if (user.type.localeCompare(req.user.type) === '0') {
-            next();
+            if (user.type.localeCompare('admin') === 0) {
+                next();
+            }
+        } else if (req.user.type.localeCompare('parent') === 0) {
+            let user = await Parent.findOne({
+                username: req.user.username
+            });
+            if (user.type.localCompare('parent') === 0) {
+                next();
+            }
+        } else {
+            res.staus(401);
         }
     } catch (error) {
-        res.status(500);
-        next(error);
+        res.status(401);
     }
-    res.status(401);
-    next();
 }
 
 module.exports = isParent;

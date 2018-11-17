@@ -1,22 +1,32 @@
-const Parent = require('../db/models/parent');
+const {
+    User,
+    Parent
+} = require('../db/index');
 const jwt = require('jsonwebtoken');
 
 async function isAdminOrTargetParent(req, res, next) {
     try {
-        let user = await Parent.findById(req.user._id);
-        if (user.type.localeCompare('admin') === '0') {
-            next();
-        }
+        if (req.user.type.localeCompare('admin') === 0) {
+            let user = await User.findOne({
+                username: req.user.username
+            });
 
-        if (req.user._id === req.params.userId) {
-            next();
+            if (user.type.localeCompare('admin') === 0) {
+                next();
+            }
+        } else if (req.user.type.localeCompare('parent') === 0) {
+            let user = await Parent.findOne({
+                username: req.user.username
+            });
+            if (user.type.localCompare('parent') === 0) {
+                next();
+            }
+        } else {
+            res.staus(401);
         }
     } catch (error) {
-        res.status(500);
-        next(error);
+        res.status(401);
     }
-    res.status(401);
-    next();
 }
 
 module.exports = isAdminOrTargetParent;

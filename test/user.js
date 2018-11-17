@@ -45,21 +45,21 @@ describe("Admins", () => {
             .then(res => {
                 expect(res.body).to.have.property("token");
                 admin_token = `Bearer ${res.body.token}`;
-                console.log(admin_token);
                 done();
             });
     });
 
     describe("/GET parents", () => {
-        User.findOne({
-            username: admin1.username
-        }).then(user => {
-            console.log("test users: " + user);
-            chai.request(server).get('/api/parents').set('authorization', admin_token).end((err, res) => {
-                res.should.have.status(200);
-                done();
+        it("should get a list of parents", done => {
+            User.findOne({
+                username: admin1.username
+            }).then(user => {
+                chai.request(server).get('/api/parents').set('authorization', admin_token).end((err, res) => {
+                    res.should.have.status(200);
+                    done();
+                });
             });
-        });
+        })
     });
 
 

@@ -17,7 +17,6 @@ module.exports = function (passport) {
     });
 
     passport.deserializeUser((id, done) => {
-        console.log("deserialize id: " + id);
         User.findById(id, (err, user) => {
             if (err || !user) {
                 Parent.findById(id, (err, user) => {
@@ -77,7 +76,6 @@ module.exports = function (passport) {
 
         if (type.localeCompare('admin') === 0) {
             try {
-                console.log("Creating admin");
                 const user = await User.create({
                     'username': username,
                     'password': password
@@ -199,7 +197,6 @@ module.exports = function (passport) {
     };
     passport.use(new JwtStrategy(opts, async (jwt_payload, done) => {
         try {
-            console.log("jwt_payload.user: " + JSON.stringify(jwt_payload.user));
             if (jwt_payload.user.type === 'admin') {
                 let user = await User.findById(jwt_payload.user._id);
                 if (user) {

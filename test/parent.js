@@ -41,8 +41,7 @@ describe("Parents", () => {
             .post("/api/auth/login/parent")
             .send({
                 username: parent1.username,
-                password: parent1.password,
-                type: "parent"
+                password: parent1.password
             })
             .expect(200)
             .then(res => {
@@ -91,6 +90,19 @@ describe("Parents", () => {
             });
         })
     })
+
+    describe("/GET parents", () => {
+        it("should return 401 instead of list of parents", done => {
+            Parent.findOne({
+                username: parent1.username
+            }).then(user => {
+                chai.request(server).get('/api/parents').set('authorization', parent_token).end((err, res) => {
+                    res.should.have.status(401);
+                    done();
+                });
+            });
+        })
+    });
 
 
 

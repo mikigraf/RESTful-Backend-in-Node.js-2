@@ -59,7 +59,7 @@ const kidRoutes = require('./app/routes/kidRoutes');
 app.use('/api/', passport.authenticate('jwt'), kidRoutes);
 
 const parentRoutes = require('./app/routes/parentRoutes');
-app.use('/api/', [passport.authenticate('jwt'), isParent], parentRoutes);
+app.use('/api/', [passport.authenticate('jwt')], parentRoutes);
 
 const providerRoutes = require('./app/routes/providerRoutes');
 app.use('/api/', [passport.authenticate('jwt'), isProvider], providerRoutes);

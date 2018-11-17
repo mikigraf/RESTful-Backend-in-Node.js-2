@@ -3,20 +3,18 @@ const jwt = require('jsonwebtoken');
 
 async function isAdminOrTargetUser(req, res, next) {
     try {
-        let user = await User.findById(req.user.id);
-        if (user.type.localeCompare('admin') === '0') {
-            next();
+        if (req.user.type.localeCompare('admin') === 0) {
+
+        } else if (req.user.type.localeCompare('parent') === 0) {
+
+        } else {
+            res.staus(401);
         }
 
-        if (req.user._id === req.params.userId) {
-            next();
-        }
+
     } catch (error) {
-        res.status(500);
-        next(error);
+        res.status(401);
     }
-    res.status(401);
-    next();
 }
 
 module.exports = isAdminOrTargetUser;
